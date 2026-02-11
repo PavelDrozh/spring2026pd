@@ -1,0 +1,17 @@
+spring:
+  application:
+    locale: ru-RU #en-US
+    name: spring2026pd
+  shell:
+    interactive:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=public
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: schema.sql
+      data-locations: data.sql
