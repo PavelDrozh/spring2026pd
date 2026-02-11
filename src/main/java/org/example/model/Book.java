@@ -1,20 +1,39 @@
 package org.example.model;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
+@Entity // Указывает, что данный класс является сущностью
+@Table(name = "BOOKS") // Задает имя таблицы, на которую будет отображаться сущность
+@NamedEntityGraph(name = "books-genre-author-entity-graph",
+        attributeNodes = {@NamedAttributeNode("genre"), @NamedAttributeNode("author")})
 public class Book {
+
+    public Book (long id, String name, String description, LocalDate releaseDate, Genre genre, Author author) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.genre = genre;
+        this.author = author;
+    }
+
     @EqualsAndHashCode.Exclude
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "book_id")
     private long id;
-    @NotBlank
+    @Column(name = "name", nullable = false)
     private String name;
     @NotBlank
     @Size(max = 200)
@@ -23,6 +42,13 @@ public class Book {
     @NotNull
     @EqualsAndHashCode.Exclude
     private LocalDate releaseDate;
+    @OneToOne(targetEntity = Genre.class)
+    @JoinColumn(name = "GENRE_ID")
     private Genre genre;
+    @OneToOne(targetEntity = Author.class)
+    @JoinColumn(name = "AUTHOR_ID")
     private Author author;
+    @OneToMany(targetEntity = Comment.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "BOOK_ID")
+    private List<Comment> comments;
 }

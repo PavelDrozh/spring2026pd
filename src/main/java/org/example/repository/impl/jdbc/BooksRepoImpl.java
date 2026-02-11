@@ -1,4 +1,4 @@
-package org.example.repository.impl;
+package org.example.repository.impl.jdbc;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,6 +6,7 @@ import org.example.model.Author;
 import org.example.model.Book;
 import org.example.model.Genre;
 import org.example.repository.BooksRepo;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -20,15 +21,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.example.repository.impl.AuthorsRepoImpl.*;
-import static org.example.repository.impl.GenresRepoImpl.GENRE;
-import static org.example.repository.impl.GenresRepoImpl.GENRE_ID;
+import static org.example.repository.impl.jdbc.AuthorsRepoImpl.*;
+import static org.example.repository.impl.jdbc.GenresRepoImpl.GENRE;
+import static org.example.repository.impl.jdbc.GenresRepoImpl.GENRE_ID;
 
 @Slf4j
 @Repository
 @AllArgsConstructor
+@ConditionalOnProperty(value = "useJPA", havingValue = "false")
 public class BooksRepoImpl implements BooksRepo {
-    private static final String BOOK_ID_PARAM = "bookId";
+    private static final String BOOK_ID_PARAM = "book";
     private static final String NAME_PARAM = "name";
     private static final String DESCRIPTION_PARAM = "description";
     private static final String RELEASE_DATE_PARAM = "releaseDate";

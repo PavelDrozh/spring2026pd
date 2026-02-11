@@ -1,4 +1,7 @@
+useJPA: true
 spring:
+  jpa:
+    show-sql: true
   application:
     locale: ru-RU #en-US
     name: spring2026pd

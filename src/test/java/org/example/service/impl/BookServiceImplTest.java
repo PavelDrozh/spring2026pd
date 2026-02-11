@@ -1,5 +1,8 @@
 package org.example.service.impl;
 
+import org.example.exceptions.AuthorNotFoundException;
+import org.example.exceptions.BookNotFoundException;
+import org.example.exceptions.GenreNotFoundException;
 import org.example.model.Author;
 import org.example.model.Book;
 import org.example.model.Genre;
@@ -20,7 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static org.example.util.LocalizationServiceImpl.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -28,11 +31,7 @@ import static org.mockito.Mockito.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class BookServiceImplTest {
 
-    public static final String MESSAGE = "message";
-    public static final String NEW_BOOK = "New Book";
     public static final String TEST_BOOK = "Test Book";
-    public static final String DATE = "2023-01-15";
-    public static final String NEW_DESCRIPTION = "New Description";
     @Mock
     private BooksRepo booksRepo;
 
@@ -45,9 +44,6 @@ class BookServiceImplTest {
     @Mock
     private LocalizationService localizationService;
 
-    @Mock
-    private IOService ioService;
-
     private BookServiceImpl bookService;
 
     private Book testBook;
@@ -56,10 +52,12 @@ class BookServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        bookService = new BookServiceImpl(booksRepo, genresRepo, authorsRepo, localizationService, ioService);
-        testAuthor = new Author(1L, "John", "Doe", LocalDate.of(1980, 1, 15));
+        bookService = new BookServiceImpl(booksRepo, genresRepo, authorsRepo, localizationService);
+        testAuthor = new Author(1L, "John", "Doe",
+                LocalDate.of(1980, 1, 15));
         testGenre = new Genre(1L, "Fiction");
-        testBook = new Book(1L, TEST_BOOK, "Test Description", LocalDate.of(2020, 5, 10), testGenre, testAuthor);
+        testBook = new Book(1L, TEST_BOOK, "Test Description",
+                LocalDate.of(2020, 5, 10), testGenre, testAuthor);
     }
 
     @Test
@@ -67,57 +65,35 @@ class BookServiceImplTest {
         List<Book> books = List.of(testBook);
 
         when(booksRepo.getAll()).thenReturn(books);
-        when(localizationService.getMessage(anyString(), any())).thenReturn(MESSAGE);
 
-        bookService.printAll();
+        List<Book> result = bookService.getAll();
 
         verify(booksRepo).getAll();
-        verify(localizationService).getMessage(eq(BOOKS_TOTAL), eq(1));
-        verify(localizationService).getMessage(eq(BOOKS_ID), eq(1L));
-        verify(localizationService).getMessage(eq(BOOKS_NAME), eq(TEST_BOOK));
-        verify(ioService, atLeastOnce()).outputString(anyString());
+        assertIterableEquals(books, result);
     }
 
     @Test
-    void printByIdFound() {
-        when(ioService.readString()).thenReturn("1");
+    void getByIdFound() {
         when(booksRepo.getById(1L)).thenReturn(Optional.of(testBook));
-        when(localizationService.getMessage(anyString(), any())).thenReturn(MESSAGE);
 
-        bookService.printById();
+        bookService.getById(1L);
 
         verify(booksRepo).getById(1L);
-        verify(localizationService).getMessage(eq(BOOKS_ID), eq(1L));
-        verify(localizationService).getMessage(eq(BOOKS_NAME), eq(TEST_BOOK));
-        verify(localizationService).getMessage(eq(BOOKS_RELEASE_DATE), eq(LocalDate.of(2020, 5, 10)));
-        verify(localizationService).getMessage(eq(BOOKS_DESCRIPTION), eq("Test Description"));
     }
 
     @Test
-    void printByIdNotFound() {
-        when(ioService.readString()).thenReturn("999");
+    void getByIdNotFound() {
         when(booksRepo.getById(999L)).thenReturn(Optional.empty());
-        when(localizationService.getMessage(anyString(), any())).thenReturn(MESSAGE);
 
-        bookService.printById();
-
-        verify(booksRepo).getById(999L);
-        verify(localizationService).getMessage(eq(BOOKS_FIND_BY_NOT_FOUND), eq(999L));
+        assertThrows(BookNotFoundException.class, () -> bookService.getById(999L));
     }
 
     @Test
     void createSuccess() {
-        when(ioService.readString())
-                .thenReturn(NEW_BOOK)
-                .thenReturn(DATE)
-                .thenReturn(NEW_DESCRIPTION)
-                .thenReturn("1")
-                .thenReturn("1");
         when(authorsRepo.getById(1L)).thenReturn(Optional.of(testAuthor));
         when(genresRepo.getById(1L)).thenReturn(Optional.of(testGenre));
-        when(localizationService.getMessage(anyString(), any())).thenReturn(MESSAGE);
 
-        bookService.create();
+        bookService.create(testBook);
 
         verify(booksRepo).create(any(Book.class));
         verify(authorsRepo).getById(1L);
@@ -126,73 +102,47 @@ class BookServiceImplTest {
 
     @Test
     void createAuthorNotFound() {
-        when(ioService.readString())
-                .thenReturn(NEW_BOOK)
-                .thenReturn(DATE)
-                .thenReturn(NEW_DESCRIPTION)
-                .thenReturn("999");
+        testBook.getAuthor().setId(999L);
         when(authorsRepo.getById(999L)).thenReturn(Optional.empty());
-        when(localizationService.getMessage(anyString(), any())).thenReturn(MESSAGE);
 
-        bookService.create();
-
-        verify(booksRepo, never()).create(any(Book.class));
-        verify(localizationService).getMessage(eq(AUTHORS_NOT_FOUND), eq(999L));
+        assertThrows(AuthorNotFoundException.class, () -> bookService.create(testBook));
     }
 
     @Test
     void createGenreNotFound() {
-        when(ioService.readString())
-                .thenReturn(NEW_BOOK)
-                .thenReturn(DATE)
-                .thenReturn(NEW_DESCRIPTION)
-                .thenReturn("1")
-                .thenReturn("999");
+        testBook.getGenre().setId(999L);
         when(authorsRepo.getById(1L)).thenReturn(Optional.of(testAuthor));
         when(genresRepo.getById(999L)).thenReturn(Optional.empty());
-        when(localizationService.getMessage(anyString(), any())).thenReturn(MESSAGE);
 
-        bookService.create();
-
-        verify(booksRepo, never()).create(any(Book.class));
-        verify(localizationService).getMessage(eq(GENRES_NOT_FOUND), eq(999L));
+        assertThrows(GenreNotFoundException.class, () -> bookService.create(testBook));
     }
 
     @Test
     void updateSuccess() {
-        when(ioService.readString())
-                .thenReturn("1")
-                .thenReturn("Updated Name")
-                .thenReturn("")
-                .thenReturn("Updated Description")
-                .thenReturn("")
-                .thenReturn("");
+        Book updateTestBook = new Book(1L, "Updated Book", "Updated Description", null, null, null);
+        Book expectedBook = new Book(1L, "Updated Book", "Updated Description", testBook.getReleaseDate(), testGenre, testAuthor);
         when(booksRepo.getById(1L)).thenReturn(Optional.of(testBook));
-        when(localizationService.getMessage(anyString(), any())).thenReturn(MESSAGE);
+        when(booksRepo.update(expectedBook)).thenReturn(expectedBook);
 
-        bookService.update();
+        Book result = bookService.update(updateTestBook);
 
-        verify(booksRepo).update(any(Book.class));
+        assertEquals(updateTestBook.getId(), result.getId());
+        assertEquals(updateTestBook.getName(), result.getName());
+        assertEquals(updateTestBook.getDescription(), result.getDescription());
     }
 
     @Test
     void updateBookNotFound() {
-        when(ioService.readString()).thenReturn("999");
+        Book updateTestBook = new Book(999L, null, null, null, null, null);
         when(booksRepo.getById(999L)).thenReturn(Optional.empty());
-        when(localizationService.getMessage(anyString(), any())).thenReturn(MESSAGE);
 
-        bookService.update();
+        assertThrows(BookNotFoundException.class, () -> bookService.update(updateTestBook));
 
-        verify(booksRepo, never()).update(any(Book.class));
-        verify(localizationService).getMessage(eq(BOOKS_NOT_FOUND), eq(999L));
     }
 
     @Test
     void delete() {
-        when(ioService.readString()).thenReturn("1");
-        when(localizationService.getMessage(anyString(), any())).thenReturn(MESSAGE);
-
-        bookService.delete();
+        bookService.delete(1L);
 
         verify(booksRepo).delete(1L);
     }

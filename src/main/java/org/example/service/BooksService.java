@@ -1,9 +1,13 @@
 package org.example.service;
 
+import org.example.model.Book;
+
+import java.util.List;
+
 public interface BooksService {
-    void printAll();
-    void printById();
-    void create();
-    void update();
-    void delete();
+    List<Book> getAll();
+    Book getById(long id);
+    Book create(Book book);
+    Book update(Book book);
+    void delete(long id);
 }

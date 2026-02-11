@@ -31,34 +31,19 @@ ON CONFLICT (BOOK_ID) DO UPDATE
         RELEASE_DATE = EXCLUDED.RELEASE_DATE,
         DESCRIPTION = EXCLUDED.DESCRIPTION;
 
+INSERT INTO COMMENTS (COMMENT_ID, COMMENT, BOOK_ID)
+VALUES (1, 'first comment', 1),
+       (2, 'second comment', 2),
+       (3, 'third comment', 3),
+       (4, 'fourth comment', 4),
+       (5, 'fifth comment', 5)
+    ON CONFLICT (COMMENT_ID) DO UPDATE
+                                 SET COMMENT_ID = EXCLUDED.COMMENT_ID,
+                                    COMMENT = EXCLUDED.COMMENT,
+                                     BOOK_ID = EXCLUDED.BOOK_ID;
+
 -- Синхронизация последовательностей после вставки данных
 SELECT setval('genres_genre_id_seq', (SELECT MAX(genre_id) FROM genres));
 SELECT setval('authors_author_id_seq', (SELECT MAX(author_id) FROM authors));
 SELECT setval('books_book_id_seq', (SELECT MAX(book_id) FROM books));
-/*
-MERGE INTO GENRES AS g
-USING (
-    VALUES (1, 'Комедия'),
-           (2, 'Драма'),
-           (3, 'Триллер'),
-           (4, 'Документальный'),
-           (5, 'Боевик')
-) AS new_data(GENRE_ID, NAME)
-ON g.GENRE_ID = new_data.GENRE_ID AND g.NAME = new_data.NAME
-WHEN MATCHED THEN UPDATE SET GENRE_ID = new_data.GENRE_ID, NAME = new_data.NAME
-WHEN NOT MATCHED THEN INSERT (GENRE_ID, NAME) VALUES (new_data.GENRE_ID, new_data.NAME);
-
-MERGE INTO AUTHORS AS g
-USING (
-    VALUES (1, 'G', 'G', '2000-01-01'),
-           (2, 'A', 'A', '2000-01-01'),
-           (3, 'B', 'B', '2000-01-01'),
-           (4, 'R', 'R', '2000-01-01'),
-           (5, 'N', 'N', '2000-01-01')
-) AS new_data(AUTHOR_ID, NAME, SURNAME, BIRTHDAY)
-ON g.AUTHOR_ID = new_data.AUTHOR_ID
-WHEN MATCHED THEN UPDATE SET AUTHOR_ID = new_data.AUTHOR_ID, NAME = new_data.NAME,
-                             SURNAME = new_data.SURNAME, BIRTHDAY = new_data.BIRTHDAY
-WHEN NOT MATCHED THEN INSERT (AUTHOR_ID, NAME, SURNAME, BIRTHDAY)
-                      VALUES (new_data.AUTHOR_ID, new_data.NAME, new_data.SURNAME, new_data.BIRTHDAY);
-*/
+SELECT setval('comments_comment_id_seq', (SELECT MAX(comment_id) FROM comments));

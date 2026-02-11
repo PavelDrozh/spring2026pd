@@ -1,8 +1,9 @@
-package org.example.repository.impl;
+package org.example.repository.impl.jdbc;
 
 import lombok.AllArgsConstructor;
 import org.example.model.Genre;
 import org.example.repository.GenresRepo;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Repository
 @AllArgsConstructor
+@ConditionalOnProperty(value = "useJPA", havingValue = "false")
 public class GenresRepoImpl implements GenresRepo {
 
     public static final String NAME_PARAM = "name";

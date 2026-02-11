@@ -30,6 +30,16 @@ public class LocalizationServiceImpl implements LocalizationService {
     public static final String BOOKS_NOT_FOUND = "books.not.found";
     public static final String BOOKS_DELETE_START = "books.delete.start";
 
+    public static final String COMMENTS_GET_BOOK = "comments.get.book.id";
+    public static final String COMMENTS_GET_BOOK_DELETE = "comments.get.book.id.delete";
+    public static final String COMMENTS_GET_COMMENT = "comments.get.comment";
+    public static final String COMMENTS_ID = "comments.id";
+    public static final String COMMENTS_COMMENT = "comments.comment";
+    public static final String COMMENTS_BOOK_ID = "comments.book.id";
+    public static final String COMMENTS_GET_COMMENT_ID = "comments.get.comment.id";
+    public static final String COMMENTS_PARSE_ID_ERR = "comments.parse.id.err";
+    public static final String COMMENTS_NOT_FOUND = "comments.not.found";
+
     public static final String GENRES_NOT_FOUND = "genres.not.found";
     public static final String GENRES_PARSE_ID_ERR = "genres.find.by.id.err";
     public static final String AUTHORS_NOT_FOUND = "authors.not.found";
