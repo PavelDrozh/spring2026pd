@@ -52,33 +52,33 @@ class CommentsServiceImplTest {
     @Test
     void getAllByBook_returnsFromRepo() {
         List<Comment> comments = List.of(testComment);
-        when(commentsRepo.getAllByBook(1L)).thenReturn(comments);
+        when(commentsRepo.findAllByBookId(1L)).thenReturn(comments);
 
         List<Comment> result = commentsService.getAllByBook(1L);
 
-        verify(commentsRepo).getAllByBook(1L);
+        verify(commentsRepo).findAllByBookId(1L);
         assertIterableEquals(comments, result);
     }
 
     @Test
     void getById_returnsCommentWhenExists() {
-        when(commentsRepo.getById(1L)).thenReturn(Optional.of(testComment));
+        when(commentsRepo.findById(1L)).thenReturn(Optional.of(testComment));
 
         Comment result = commentsService.getById(1L);
 
-        verify(commentsRepo).getById(1L);
+        verify(commentsRepo).findById(1L);
         assertSame(testComment, result);
     }
 
     @Test
     void getById_throwsWhenNotFound() {
-        when(commentsRepo.getById(999L)).thenReturn(Optional.empty());
+        when(commentsRepo.findById(999L)).thenReturn(Optional.empty());
         when(localizationService.getMessage(COMMENTS_NOT_FOUND, 999L)).thenReturn(MESSAGE);
 
         CommentNotFoundException ex = assertThrows(CommentNotFoundException.class, () -> commentsService.getById(999L));
 
         assertEquals(MESSAGE, ex.getMessage());
-        verify(commentsRepo).getById(999L);
+        verify(commentsRepo).findById(999L);
         verify(localizationService).getMessage(COMMENTS_NOT_FOUND, 999L);
         verifyNoMoreInteractions(commentsRepo, localizationService);
     }
@@ -89,39 +89,39 @@ class CommentsServiceImplTest {
         Comment created = Comment.builder().id(10L).comment("new").book(testBook).build();
 
         when(booksService.getById(1L)).thenReturn(testBook);
-        when(commentsRepo.create(toCreate)).thenReturn(created);
+        when(commentsRepo.save(toCreate)).thenReturn(created);
 
         Comment result = commentsService.create(toCreate);
 
         assertSame(created, result);
         verify(booksService).getById(1L);
-        verify(commentsRepo).create(toCreate);
+        verify(commentsRepo).save(toCreate);
     }
 
     @Test
     void update_delegatesToRepo() {
         Comment updated = Comment.builder().id(1L).comment("updated").book(testBook).build();
-        when(commentsRepo.update(updated)).thenReturn(updated);
+        when(commentsRepo.save(updated)).thenReturn(updated);
 
         Comment result = commentsService.update(updated);
 
         assertSame(updated, result);
-        verify(commentsRepo).update(updated);
+        verify(commentsRepo).save(updated);
     }
 
     @Test
     void delete_delegatesToRepo() {
         commentsService.delete(1L);
 
-        verify(commentsRepo).delete(1L);
+        verify(commentsRepo).deleteById(1L);
     }
 
     @Test
     void deleteAllByBook_delegatesToRepo() {
-        when(commentsRepo.deleteAllByBook(1L)).thenReturn(2);
+        when(commentsRepo.deleteByBookId(1L)).thenReturn(2L);
 
         commentsService.deleteAllByBook(1L);
 
-        verify(commentsRepo).deleteAllByBook(1L);
+        verify(commentsRepo).deleteByBookId(1L);
     }
 }

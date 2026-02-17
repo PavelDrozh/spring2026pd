@@ -1,15 +1,15 @@
 package org.example.repository;
 
 import org.example.model.Comment;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface CommentsRepo {
-    List<Comment> getAllByBook(long bookId);
-    Optional<Comment> getById(long id);
-    Comment create(Comment comment);
-    Comment update(Comment comment);
-    void delete(long id);
-    int deleteAllByBook(long bookId);
+public interface CommentsRepo extends JpaRepository<Comment, Long> {
+
+    @EntityGraph(value = "books-entity-graph") // или attributePaths = "book"
+    List<Comment> findAllByBookId(Long bookId);
+
+    long deleteByBookId(Long bookId);
 }

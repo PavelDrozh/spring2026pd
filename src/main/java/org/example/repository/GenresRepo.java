@@ -1,14 +1,7 @@
 package org.example.repository;
 
 import org.example.model.Genre;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-import java.util.Optional;
-
-public interface GenresRepo {
-    List<Genre> getAll();
-    Optional<Genre> getById(long id);
-    Genre create(Genre genre);
-    Genre update(Genre genre);
-    void delete(long id);
+public interface GenresRepo extends JpaRepository<Genre, Long> {
 }

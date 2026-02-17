@@ -1,4 +1,3 @@
-useJPA: false
 spring:
   application:
     locale: ru-RU #en-US

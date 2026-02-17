@@ -9,7 +9,6 @@ import org.example.model.Genre;
 import org.example.repository.AuthorsRepo;
 import org.example.repository.BooksRepo;
 import org.example.repository.GenresRepo;
-import org.example.util.IOService;
 import org.example.util.LocalizationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,46 +63,46 @@ class BookServiceImplTest {
     void printAll() {
         List<Book> books = List.of(testBook);
 
-        when(booksRepo.getAll()).thenReturn(books);
+        when(booksRepo.findAll()).thenReturn(books);
 
         List<Book> result = bookService.getAll();
 
-        verify(booksRepo).getAll();
+        verify(booksRepo).findAll();
         assertIterableEquals(books, result);
     }
 
     @Test
     void getByIdFound() {
-        when(booksRepo.getById(1L)).thenReturn(Optional.of(testBook));
+        when(booksRepo.findById(1L)).thenReturn(Optional.of(testBook));
 
         bookService.getById(1L);
 
-        verify(booksRepo).getById(1L);
+        verify(booksRepo).findById(1L);
     }
 
     @Test
     void getByIdNotFound() {
-        when(booksRepo.getById(999L)).thenReturn(Optional.empty());
+        when(booksRepo.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(BookNotFoundException.class, () -> bookService.getById(999L));
     }
 
     @Test
     void createSuccess() {
-        when(authorsRepo.getById(1L)).thenReturn(Optional.of(testAuthor));
-        when(genresRepo.getById(1L)).thenReturn(Optional.of(testGenre));
+        when(authorsRepo.findById(1L)).thenReturn(Optional.of(testAuthor));
+        when(genresRepo.findById(1L)).thenReturn(Optional.of(testGenre));
 
         bookService.create(testBook);
 
-        verify(booksRepo).create(any(Book.class));
-        verify(authorsRepo).getById(1L);
-        verify(genresRepo).getById(1L);
+        verify(booksRepo).save(any(Book.class));
+        verify(authorsRepo).findById(1L);
+        verify(genresRepo).findById(1L);
     }
 
     @Test
     void createAuthorNotFound() {
         testBook.getAuthor().setId(999L);
-        when(authorsRepo.getById(999L)).thenReturn(Optional.empty());
+        when(authorsRepo.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(AuthorNotFoundException.class, () -> bookService.create(testBook));
     }
@@ -111,8 +110,8 @@ class BookServiceImplTest {
     @Test
     void createGenreNotFound() {
         testBook.getGenre().setId(999L);
-        when(authorsRepo.getById(1L)).thenReturn(Optional.of(testAuthor));
-        when(genresRepo.getById(999L)).thenReturn(Optional.empty());
+        when(authorsRepo.findById(1L)).thenReturn(Optional.of(testAuthor));
+        when(genresRepo.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(GenreNotFoundException.class, () -> bookService.create(testBook));
     }
@@ -121,8 +120,8 @@ class BookServiceImplTest {
     void updateSuccess() {
         Book updateTestBook = new Book(1L, "Updated Book", "Updated Description", null, null, null);
         Book expectedBook = new Book(1L, "Updated Book", "Updated Description", testBook.getReleaseDate(), testGenre, testAuthor);
-        when(booksRepo.getById(1L)).thenReturn(Optional.of(testBook));
-        when(booksRepo.update(expectedBook)).thenReturn(expectedBook);
+        when(booksRepo.findById(1L)).thenReturn(Optional.of(testBook));
+        when(booksRepo.save(expectedBook)).thenReturn(expectedBook);
 
         Book result = bookService.update(updateTestBook);
 
@@ -134,7 +133,7 @@ class BookServiceImplTest {
     @Test
     void updateBookNotFound() {
         Book updateTestBook = new Book(999L, null, null, null, null, null);
-        when(booksRepo.getById(999L)).thenReturn(Optional.empty());
+        when(booksRepo.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(BookNotFoundException.class, () -> bookService.update(updateTestBook));
 
@@ -144,6 +143,6 @@ class BookServiceImplTest {
     void delete() {
         bookService.delete(1L);
 
-        verify(booksRepo).delete(1L);
+        verify(booksRepo).deleteById(1L);
     }
 }

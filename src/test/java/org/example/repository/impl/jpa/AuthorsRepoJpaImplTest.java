@@ -1,11 +1,11 @@
 package org.example.repository.impl.jpa;
 
 import org.example.model.Author;
+import org.example.repository.AuthorsRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
@@ -14,16 +14,14 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(AuthorsRepoJpaImpl.class)
 @TestPropertySource(properties = {
-        "useJPA=true",
         "spring.sql.init.mode=never",
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class AuthorsRepoJpaImplTest {
 
     @Autowired
-    private AuthorsRepoJpaImpl repository;
+    private AuthorsRepo repository;
 
     @Autowired
     private TestEntityManager em;
@@ -35,7 +33,7 @@ class AuthorsRepoJpaImplTest {
         em.flush();
         em.clear();
 
-        List<Author> authors = repository.getAll();
+        List<Author> authors = repository.findAll();
 
         assertThat(authors)
                 .hasSize(2)
@@ -48,7 +46,7 @@ class AuthorsRepoJpaImplTest {
         Author saved = em.persistAndFlush(new Author(null, "John", "Doe", LocalDate.of(1980, 1, 15)));
         em.clear();
 
-        var result = repository.getById(saved.getId());
+        var result = repository.findById(saved.getId());
 
         assertThat(result)
                 .isPresent()
@@ -59,7 +57,7 @@ class AuthorsRepoJpaImplTest {
 
     @Test
     void create_persistsWhenIdIsZero() {
-        Author created = repository.create(new Author(null, "New", "Author", LocalDate.of(1999, 12, 31)));
+        Author created = repository.save(new Author(null, "New", "Author", LocalDate.of(1999, 12, 31)));
         em.flush();
         em.clear();
 
@@ -74,7 +72,7 @@ class AuthorsRepoJpaImplTest {
         em.clear();
 
         saved.setName("Updated");
-        repository.update(saved);
+        repository.save(saved);
         em.flush();
         em.clear();
 
@@ -87,7 +85,7 @@ class AuthorsRepoJpaImplTest {
         Author saved = em.persistAndFlush(new Author(null, "ToDelete", "X", LocalDate.of(1970, 1, 1)));
         Long id = saved.getId();
 
-        repository.delete(id);
+        repository.deleteById(id);
         em.flush();
         em.clear();
 

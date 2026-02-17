@@ -26,13 +26,13 @@ public class CommentsServiceImpl implements CommentsService {
     @Override
     @Transactional(readOnly = true)
     public List<Comment> getAllByBook(long bookId) {
-        return commentsRepo.getAllByBook(bookId);
+        return commentsRepo.findAllByBookId(bookId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Comment getById(long id) {
-        Optional<Comment> oComment = commentsRepo.getById(id);
+        Optional<Comment> oComment = commentsRepo.findById(id);
         if (oComment.isEmpty()) {
             throw new CommentNotFoundException(localizationService.getMessage(COMMENTS_NOT_FOUND, id));
         }
@@ -43,24 +43,24 @@ public class CommentsServiceImpl implements CommentsService {
     @Transactional
     public Comment create(Comment comment) {
         booksService.getById(comment.getBook().getId());
-        return commentsRepo.create(comment);
+        return commentsRepo.save(comment);
     }
 
     @Override
     @Transactional
     public Comment update(Comment comment) {
-        return commentsRepo.update(comment);
+        return commentsRepo.save(comment);
     }
 
     @Override
     @Transactional
     public void delete(long id) {
-        commentsRepo.delete(id);
+        commentsRepo.deleteById(id);
     }
 
     @Override
     @Transactional
     public void deleteAllByBook(long bookId) {
-        commentsRepo.deleteAllByBook(bookId);
+        commentsRepo.deleteByBookId(bookId);
     }
 }
