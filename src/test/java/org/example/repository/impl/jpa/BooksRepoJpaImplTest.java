@@ -3,11 +3,11 @@ package org.example.repository.impl.jpa;
 import org.example.model.Author;
 import org.example.model.Book;
 import org.example.model.Genre;
+import org.example.repository.BooksRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
@@ -16,7 +16,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(BooksRepoJpaImpl.class)
 @TestPropertySource(properties = {
         "spring.sql.init.mode=never",
         "spring.jpa.hibernate.ddl-auto=create-drop"
@@ -24,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BooksRepoJpaImplTest {
 
     @Autowired
-    private BooksRepoJpaImpl repository;
+    private BooksRepo repository;
 
     @Autowired
     private TestEntityManager em;
@@ -55,7 +54,7 @@ class BooksRepoJpaImplTest {
         em.flush();
         em.clear();
 
-        List<Book> books = repository.getAll();
+        List<Book> books = repository.findAll();
 
         assertThat(books)
                 .hasSize(2)
@@ -78,7 +77,7 @@ class BooksRepoJpaImplTest {
 
         em.clear();
 
-        var result = repository.getById(saved.getId());
+        var result = repository.findById(saved.getId());
 
         assertThat(result).isPresent();
         assertThat(result.get().getName()).isEqualTo("Book");
@@ -90,7 +89,7 @@ class BooksRepoJpaImplTest {
         Author author = em.persist(new Author(null, "Name", "Surname", LocalDate.of(2000, 1, 1)));
         em.flush();
 
-        Book created = repository.create(Book.builder()
+        Book created = repository.save(Book.builder()
                 .name("NewBook")
                 .description("NewDesc")
                 .releaseDate(LocalDate.of(2022, 2, 2))
@@ -122,7 +121,7 @@ class BooksRepoJpaImplTest {
         em.clear();
 
         saved.setName("Updated");
-        repository.update(saved);
+        repository.save(saved);
         em.flush();
         em.clear();
 
@@ -145,7 +144,7 @@ class BooksRepoJpaImplTest {
 
         long id = saved.getId();
 
-        repository.delete(id);
+        repository.deleteById(id);
         em.flush();
         em.clear();
 

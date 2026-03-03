@@ -33,13 +33,13 @@ public class BookServiceImpl  implements BooksService {
     @Transactional(readOnly = true)
     @Override
     public List<Book> getAll() {
-        return booksRepo.getAll();
+        return booksRepo.findAll();
     }
 
     @Transactional(readOnly = true)
     @Override
     public Book getById(long id) {
-        Optional<Book> oBook = booksRepo.getById(id);
+        Optional<Book> oBook = booksRepo.findById(id);
         if (oBook.isEmpty()) {
             throw new BookNotFoundException(localizationService.getMessage(BOOKS_NOT_FOUND, id));
         }
@@ -50,30 +50,30 @@ public class BookServiceImpl  implements BooksService {
     @Override
     public Book create(Book book) {
         long authorId = book.getAuthor().getId();
-        Optional<Author> oAuthor = authorsRepo.getById(authorId);
+        Optional<Author> oAuthor = authorsRepo.findById(authorId);
         if (oAuthor.isEmpty()) {
             throw new AuthorNotFoundException(localizationService.getMessage(AUTHORS_NOT_FOUND, authorId));
         }
         long genreId = book.getGenre().getId();
-        Optional<Genre> oGenre = genresRepo.getById(genreId);
+        Optional<Genre> oGenre = genresRepo.findById(genreId);
         if (oGenre.isEmpty()) {
             throw new GenreNotFoundException(localizationService.getMessage(GENRES_NOT_FOUND, genreId));
         }
         book.setGenre(oGenre.get());
         book.setAuthor(oAuthor.get());
-        return booksRepo.create(book);
+        return booksRepo.save(book);
     }
 
     @Transactional
     @Override
     public Book update(Book book) {
-        Optional<Book> oBook = booksRepo.getById(book.getId());
+        Optional<Book> oBook = booksRepo.findById(book.getId());
         if (oBook.isEmpty()) {
             throw new BookNotFoundException(localizationService.getMessage(BOOKS_NOT_FOUND, book.getId()));
         }
         Book bookForUpdate = oBook.get();
         if(Objects.nonNull(book.getAuthor())) {
-            Optional<Author> oAuthor = authorsRepo.getById(book.getAuthor().getId());
+            Optional<Author> oAuthor = authorsRepo.findById(book.getAuthor().getId());
             if (oAuthor.isEmpty()) {
                 throw new AuthorNotFoundException(localizationService.
                         getMessage(AUTHORS_NOT_FOUND, book.getAuthor().getId()));
@@ -81,7 +81,7 @@ public class BookServiceImpl  implements BooksService {
             book.setAuthor(oAuthor.get());
         }
         if(Objects.nonNull(book.getGenre())) {
-            Optional<Genre> oGenre = genresRepo.getById(book.getGenre().getId());
+            Optional<Genre> oGenre = genresRepo.findById(book.getGenre().getId());
             if (oGenre.isEmpty()) {
                 throw new GenreNotFoundException(localizationService.
                         getMessage(GENRES_NOT_FOUND, book.getGenre().getId()));
@@ -89,7 +89,7 @@ public class BookServiceImpl  implements BooksService {
             book.setGenre(oGenre.get());
         }
         fillBookWithNonNull(bookForUpdate, book);
-        return booksRepo.update(bookForUpdate);
+        return booksRepo.save(bookForUpdate);
     }
 
     private void fillBookWithNonNull(Book bookForUpdate, Book book) {
@@ -113,6 +113,6 @@ public class BookServiceImpl  implements BooksService {
     @Transactional
     @Override
     public void delete(long id) {
-        booksRepo.delete(id);
+        booksRepo.deleteById(id);
     }
 }

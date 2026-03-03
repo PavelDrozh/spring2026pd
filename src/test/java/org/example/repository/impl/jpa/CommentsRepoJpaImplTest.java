@@ -4,11 +4,11 @@ import org.example.model.Author;
 import org.example.model.Book;
 import org.example.model.Comment;
 import org.example.model.Genre;
+import org.example.repository.CommentsRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(CommentsRepoJpaImpl.class)
 @TestPropertySource(properties = {
         "spring.sql.init.mode=never",
         "spring.jpa.hibernate.ddl-auto=create-drop"
@@ -24,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CommentsRepoJpaImplTest {
 
     @Autowired
-    private CommentsRepoJpaImpl repository;
+    private CommentsRepo repository;
 
     @Autowired
     private TestEntityManager em;
@@ -58,7 +57,7 @@ class CommentsRepoJpaImplTest {
         em.flush();
         em.clear();
 
-        var comments = repository.getAllByBook(book1.getId());
+        var comments = repository.findAllByBookId(book1.getId());
 
         assertThat(comments)
                 .hasSize(2)
@@ -82,7 +81,7 @@ class CommentsRepoJpaImplTest {
         Comment saved = em.persistAndFlush(Comment.builder().comment("hello").book(book).build());
         em.clear();
 
-        var result = repository.getById(saved.getId());
+        var result = repository.findById(saved.getId());
 
         assertThat(result).isPresent();
         assertThat(result.get().getComment()).isEqualTo("hello");
@@ -101,7 +100,7 @@ class CommentsRepoJpaImplTest {
                 .author(author)
                 .build());
 
-        Comment created = repository.create(Comment.builder().comment("new").book(book).build());
+        Comment created = repository.save(Comment.builder().comment("new").book(book).build());
         em.flush();
         em.clear();
 
@@ -127,7 +126,7 @@ class CommentsRepoJpaImplTest {
         em.clear();
 
         saved.setComment("updated");
-        repository.update(saved);
+        repository.save(saved);
         em.flush();
         em.clear();
 
@@ -151,7 +150,7 @@ class CommentsRepoJpaImplTest {
         Comment saved = em.persistAndFlush(Comment.builder().comment("toDelete").book(book).build());
         Long id = saved.getId();
 
-        repository.delete(id);
+        repository.deleteById(id);
         em.flush();
         em.clear();
 
@@ -187,12 +186,12 @@ class CommentsRepoJpaImplTest {
         em.flush();
         em.clear();
 
-        int deleted = repository.deleteAllByBook(book1.getId());
+        long deleted = repository.deleteByBookId(book1.getId());
         em.flush();
         em.clear();
 
         assertThat(deleted).isEqualTo(2);
-        assertThat(repository.getAllByBook(book1.getId())).isEmpty();
-        assertThat(repository.getAllByBook(book2.getId())).hasSize(1);
+        assertThat(repository.findAllByBookId(book1.getId())).isEmpty();
+        assertThat(repository.findAllByBookId(book2.getId())).hasSize(1);
     }
 }

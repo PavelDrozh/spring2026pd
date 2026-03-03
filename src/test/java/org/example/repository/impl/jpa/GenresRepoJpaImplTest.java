@@ -1,11 +1,11 @@
 package org.example.repository.impl.jpa;
 
 import org.example.model.Genre;
+import org.example.repository.GenresRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
@@ -13,16 +13,14 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(GenresRepoJpaImpl.class)
 @TestPropertySource(properties = {
-        "useJPA=true",
         "spring.sql.init.mode=never",
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class GenresRepoJpaImplTest {
 
     @Autowired
-    private GenresRepoJpaImpl repository;
+    private GenresRepo repository;
 
     @Autowired
     private TestEntityManager em;
@@ -34,7 +32,7 @@ class GenresRepoJpaImplTest {
         em.flush();
         em.clear();
 
-        List<Genre> genres = repository.getAll();
+        List<Genre> genres = repository.findAll();
 
         assertThat(genres)
                 .hasSize(2)
@@ -47,7 +45,7 @@ class GenresRepoJpaImplTest {
         Genre saved = em.persistAndFlush(new Genre(null, "Thriller"));
         em.clear();
 
-        var result = repository.getById(saved.getId());
+        var result = repository.findById(saved.getId());
 
         assertThat(result)
                 .isPresent()
@@ -58,7 +56,7 @@ class GenresRepoJpaImplTest {
 
     @Test
     void create_persistsWhenIdIsZero() {
-        Genre created = repository.create(new Genre(null, "New"));
+        Genre created = repository.save(new Genre(null, "New"));
         em.flush();
         em.clear();
 
@@ -73,7 +71,7 @@ class GenresRepoJpaImplTest {
         em.clear();
 
         saved.setName("Updated");
-        repository.update(saved);
+        repository.save(saved);
         em.flush();
         em.clear();
 
@@ -86,7 +84,7 @@ class GenresRepoJpaImplTest {
         Genre saved = em.persistAndFlush(new Genre(null, "ToDelete"));
         Long id = saved.getId();
 
-        repository.delete(id);
+        repository.deleteById(id);
         em.flush();
         em.clear();
 
