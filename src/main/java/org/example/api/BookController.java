@@ -1,0 +1,49 @@
+package org.example.api;
+
+import jakarta.validation.Valid;
+import org.example.model.Book;
+import org.example.service.BooksService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/books")
+public class BookController {
+
+    private final BooksService booksService;
+
+    public BookController(BooksService booksService) {
+        this.booksService = booksService;
+    }
+
+    @GetMapping
+    public List<Book> getAll() {
+        return booksService.getAll();
+    }
+
+    @GetMapping("/{id}")
+    public Book getById(@PathVariable long id) {
+        return booksService.getById(id);
+    }
+
+    @PostMapping
+    public ResponseEntity<Book> create(@Valid @RequestBody Book book) {
+        Book created = booksService.create(book);
+        return ResponseEntity.created(URI.create("/api/books/" + created.getId())).body(created);
+    }
+
+    @PutMapping("/{id}")
+    public Book update(@PathVariable long id, @RequestBody Book book) {
+        book.setId(id);
+        return booksService.update(book);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable long id) {
+        booksService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}

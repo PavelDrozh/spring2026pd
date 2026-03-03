@@ -1,3 +1,6 @@
+server:
+  port: ${SERVICE_PORT:7081}
+
 spring:
   jpa:
     show-sql: true
@@ -15,5 +18,5 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: schema.sql
-      data-locations: data.sql
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
