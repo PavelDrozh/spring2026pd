@@ -5,11 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 @SpringBootTest(properties = {
         "spring.shell.interactive.enabled=false",
@@ -22,34 +22,30 @@ class CommentsControllerSecurityTest {
     private MockMvc mockMvc;
 
     @Test
-    void unauthenticated_getAllByBook_redirectsToLogin() throws Exception {
+    void unauthenticated_getAllByBook_returns401() throws Exception {
         mockMvc.perform(get("/api/books/1/comments"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(header().string("Location", org.hamcrest.Matchers.containsString("/login")));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @WithMockUser(username = "user", roles = "USER")
     void authenticated_getAllByBook_ok() throws Exception {
-        mockMvc.perform(get("/api/books/1/comments"))
+        mockMvc.perform(get("/api/books/1/comments").with(jwt()))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void unauthenticated_create_redirectsToLogin() throws Exception {
+    void unauthenticated_create_returns401() throws Exception {
         mockMvc.perform(post("/api/books/1/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(header().string("Location", org.hamcrest.Matchers.containsString("/login")));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @WithMockUser(username = "user", roles = "USER")
-    void authenticated_create_notRedirectedToLogin() throws Exception {
-        mockMvc.perform(post("/api/books/1/comments")
+    void authenticated_create_returns404() throws Exception {
+        mockMvc.perform(post("/api/books/1/comments").with(jwt())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
-                .andExpect(status().is(org.hamcrest.Matchers.not(302)));
+                .andExpect(status().isNotFound());
     }
 }

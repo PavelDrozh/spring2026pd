@@ -12,6 +12,7 @@ import org.example.repository.BooksRepo;
 import org.example.repository.GenresRepo;
 import org.example.service.BooksService;
 import org.example.util.LocalizationService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -118,6 +119,7 @@ public class BookServiceImpl  implements BooksService {
 
     @Transactional
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void delete(long id) {
         booksRepo.deleteById(id);
     }

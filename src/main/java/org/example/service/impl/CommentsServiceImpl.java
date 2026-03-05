@@ -7,6 +7,7 @@ import org.example.repository.CommentsRepo;
 import org.example.service.BooksService;
 import org.example.service.CommentsService;
 import org.example.util.LocalizationService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,12 +55,14 @@ public class CommentsServiceImpl implements CommentsService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void delete(long id) {
         commentsRepo.deleteById(id);
     }
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteAllByBook(long bookId) {
         commentsRepo.deleteByBookId(bookId);
     }
