@@ -15,3 +15,8 @@ spring:
       mode: always
       schema-locations: classpath:schema.sql
       data-locations: optional:classpath:data.sql
+jwt:
+  private.key: classpath:app.key
+  public.key: classpath:app.pub
+  issuer: spring2026pd
+  access-ttl-minutes: 30

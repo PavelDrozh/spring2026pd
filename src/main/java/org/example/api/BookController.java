@@ -1,6 +1,8 @@
 package org.example.api;
 
 import jakarta.validation.Valid;
+import org.example.dto.BookDto;
+import org.example.dto.DtoMapper;
 import org.example.model.Book;
 import org.example.service.BooksService;
 import org.springframework.http.ResponseEntity;
@@ -20,25 +22,27 @@ public class BookController {
     }
 
     @GetMapping
-    public List<Book> getAll() {
-        return booksService.getAll();
+    public List<BookDto> getAll() {
+        return booksService.getAll().stream()
+                .map(DtoMapper.INSTANCE::toBookDto)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public Book getById(@PathVariable long id) {
-        return booksService.getById(id);
+    public BookDto getById(@PathVariable long id) {
+        return DtoMapper.INSTANCE.toBookDto(booksService.getById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Book> create(@Valid @RequestBody Book book) {
+    public ResponseEntity<BookDto> create(@Valid @RequestBody Book book) {
         Book created = booksService.create(book);
-        return ResponseEntity.created(URI.create("/api/books/" + created.getId())).body(created);
+        return ResponseEntity.created(URI.create("/api/books/" + created.getId())).body(DtoMapper.INSTANCE.toBookDto(created));
     }
 
     @PutMapping("/{id}")
-    public Book update(@PathVariable long id, @RequestBody Book book) {
+    public BookDto update(@PathVariable long id, @RequestBody Book book) {
         book.setId(id);
-        return booksService.update(book);
+        return DtoMapper.INSTANCE.toBookDto(booksService.update(book));
     }
 
     @DeleteMapping("/{id}")

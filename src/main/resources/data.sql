@@ -43,7 +43,8 @@ VALUES (1, 'first comment', 1),
                                      BOOK_ID = EXCLUDED.BOOK_ID;
 
 INSERT INTO USERS (USER_ID, USERNAME, PASSWORD, ENABLED, ROLE)
-VALUES (1, 'user', '{noop}password', true, 'ROLE_USER')
+VALUES (1, 'admin', '{noop}admin', true, 'ROLE_ADMIN'),
+       (2, 'user', '{noop}password', true, 'ROLE_USER')
 ON CONFLICT (USER_ID) DO UPDATE
     SET USERNAME = EXCLUDED.USERNAME,
         PASSWORD = EXCLUDED.PASSWORD,
