@@ -49,10 +49,16 @@ public class BookServiceImpl  implements BooksService {
     @Transactional
     @Override
     public Book create(Book book) {
+        if (Objects.isNull(book.getAuthor()) || Objects.isNull(book.getAuthor().getId())) {
+            throw new IllegalArgumentException("Author is required");
+        }
         long authorId = book.getAuthor().getId();
         Optional<Author> oAuthor = authorsRepo.findById(authorId);
         if (oAuthor.isEmpty()) {
             throw new AuthorNotFoundException(localizationService.getMessage(AUTHORS_NOT_FOUND, authorId));
+        }
+        if (Objects.isNull(book.getGenre()) || Objects.isNull(book.getGenre().getId())) {
+            throw new IllegalArgumentException("Genre is required");
         }
         long genreId = book.getGenre().getId();
         Optional<Genre> oGenre = genresRepo.findById(genreId);
@@ -93,13 +99,13 @@ public class BookServiceImpl  implements BooksService {
     }
 
     private void fillBookWithNonNull(Book bookForUpdate, Book book) {
-        if(!book.getName().isEmpty()) {
+        if (Objects.nonNull(book.getName()) && !book.getName().isBlank()) {
             bookForUpdate.setName(book.getName());
         }
         if(Objects.nonNull(book.getReleaseDate())) {
             bookForUpdate.setReleaseDate(book.getReleaseDate());
         }
-        if(!book.getDescription().isEmpty()) {
+        if (Objects.nonNull(book.getDescription()) && !book.getDescription().isBlank()) {
             bookForUpdate.setDescription(book.getDescription());
         }
         if(Objects.nonNull(book.getAuthor())) {

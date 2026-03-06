@@ -1,5 +1,6 @@
 package org.example.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,5 +24,6 @@ public class Comment {
     String comment;
     @JoinColumn(name = "BOOK_ID", nullable = false)
     @ManyToOne(targetEntity = Book.class)
+    @JsonBackReference
     Book book;
 }
