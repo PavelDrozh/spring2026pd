@@ -42,8 +42,17 @@ VALUES (1, 'first comment', 1),
                                     COMMENT = EXCLUDED.COMMENT,
                                      BOOK_ID = EXCLUDED.BOOK_ID;
 
+INSERT INTO USERS (USER_ID, USERNAME, PASSWORD, ENABLED, ROLE)
+VALUES (1, 'user', '{noop}password', true, 'ROLE_USER')
+ON CONFLICT (USER_ID) DO UPDATE
+    SET USERNAME = EXCLUDED.USERNAME,
+        PASSWORD = EXCLUDED.PASSWORD,
+        ENABLED = EXCLUDED.ENABLED,
+        ROLE = EXCLUDED.ROLE;
+
 -- Синхронизация последовательностей после вставки данных
 SELECT setval('genres_genre_id_seq', (SELECT MAX(genre_id) FROM genres));
 SELECT setval('authors_author_id_seq', (SELECT MAX(author_id) FROM authors));
 SELECT setval('books_book_id_seq', (SELECT MAX(book_id) FROM books));
 SELECT setval('comments_comment_id_seq', (SELECT MAX(comment_id) FROM comments));
+SELECT setval('users_user_id_seq', (SELECT MAX(user_id) FROM users));
