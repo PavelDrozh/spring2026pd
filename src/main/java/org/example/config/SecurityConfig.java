@@ -69,6 +69,10 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/actuator/info").permitAll()
+                        .requestMatchers("/actuator/**").permitAll() //.hasAnyRole("ADMIN") в рамках задания доступно всем, в идеале - только админ
+                        .requestMatchers("/datarest/**").permitAll() //.hasAnyRole("ADMIN") аналогичо
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->

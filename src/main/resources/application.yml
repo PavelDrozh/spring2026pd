@@ -1,6 +1,8 @@
 server:
   port: ${SERVICE_PORT:7081}
-
+logging:
+  file:
+    name: spring2026pd.log
 spring:
   jpa:
     show-sql: true
@@ -20,8 +22,25 @@ spring:
       mode: always
       schema-locations: classpath:schema.sql
       data-locations: classpath:data.sql
+  data:
+    rest:
+      basePath: /datarest
+  jmx:
+    enabled: true
 jwt:
   private.key: classpath:app.key
   public.key: classpath:app.pub
   issuer: spring2026pd
   access-ttl-minutes: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: true
