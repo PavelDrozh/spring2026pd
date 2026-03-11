@@ -1,12 +1,3 @@
-INSERT INTO GENRES (GENRE_ID, GENRE)
-VALUES (1, 'Комедия'),
-       (2, 'Драма'),
-       (3, 'Триллер'),
-       (4, 'Документальный'),
-       (5, 'Боевик')
-ON CONFLICT (GENRE_ID) DO UPDATE
-    SET GENRE = EXCLUDED.GENRE;
-
 INSERT INTO AUTHORS (AUTHOR_ID, NAME, SURNAME, BIRTHDAY)
 VALUES (1, 'G', 'G', '2000-01-01'),
        (2, 'A', 'A', '2000-01-01'),
@@ -52,7 +43,6 @@ ON CONFLICT (USER_ID) DO UPDATE
         ROLE = EXCLUDED.ROLE;
 
 -- Синхронизация последовательностей после вставки данных
-SELECT setval('genres_genre_id_seq', (SELECT MAX(genre_id) FROM genres));
 SELECT setval('authors_author_id_seq', (SELECT MAX(author_id) FROM authors));
 SELECT setval('books_book_id_seq', (SELECT MAX(book_id) FROM books));
 SELECT setval('comments_comment_id_seq', (SELECT MAX(comment_id) FROM comments));

@@ -20,3 +20,5 @@ jwt:
   public.key: classpath:app.pub
   issuer: spring2026pd
   access-ttl-minutes: 30
+genres-service:
+  base-url: ${GENRES_SERVICE_BASE_URL:http://localhost:7082}

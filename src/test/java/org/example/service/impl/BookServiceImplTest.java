@@ -3,12 +3,13 @@ package org.example.service.impl;
 import org.example.exceptions.AuthorNotFoundException;
 import org.example.exceptions.BookNotFoundException;
 import org.example.exceptions.GenreNotFoundException;
+import org.example.client.GenresClient;
+import org.example.dto.GenreDto;
 import org.example.model.Author;
 import org.example.model.Book;
 import org.example.model.Genre;
 import org.example.repository.AuthorsRepo;
 import org.example.repository.BooksRepo;
-import org.example.repository.GenresRepo;
 import org.example.util.LocalizationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ class BookServiceImplTest {
     private BooksRepo booksRepo;
 
     @Mock
-    private GenresRepo genresRepo;
+    private GenresClient genresClient;
 
     @Mock
     private AuthorsRepo authorsRepo;
@@ -51,7 +52,7 @@ class BookServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        bookService = new BookServiceImpl(booksRepo, genresRepo, authorsRepo, localizationService);
+        bookService = new BookServiceImpl(booksRepo, genresClient, authorsRepo, localizationService);
         testAuthor = new Author(1L, "John", "Doe",
                 LocalDate.of(1980, 1, 15));
         testGenre = new Genre(1L, "Fiction");
@@ -90,13 +91,13 @@ class BookServiceImplTest {
     @Test
     void createSuccess() {
         when(authorsRepo.findById(1L)).thenReturn(Optional.of(testAuthor));
-        when(genresRepo.findById(1L)).thenReturn(Optional.of(testGenre));
+        when(genresClient.getById(1L)).thenReturn(Optional.of(new GenreDto(1L, "Fiction")));
 
         bookService.create(testBook);
 
         verify(booksRepo).save(any(Book.class));
         verify(authorsRepo).findById(1L);
-        verify(genresRepo).findById(1L);
+        verify(genresClient).getById(1L);
     }
 
     @Test
@@ -111,7 +112,7 @@ class BookServiceImplTest {
     void createGenreNotFound() {
         testBook.getGenre().setId(999L);
         when(authorsRepo.findById(1L)).thenReturn(Optional.of(testAuthor));
-        when(genresRepo.findById(999L)).thenReturn(Optional.empty());
+        when(genresClient.getById(999L)).thenReturn(Optional.empty());
 
         assertThrows(GenreNotFoundException.class, () -> bookService.create(testBook));
     }
