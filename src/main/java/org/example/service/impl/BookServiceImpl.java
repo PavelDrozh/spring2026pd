@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import org.example.exceptions.AuthorNotFoundException;
 import org.example.exceptions.BookNotFoundException;
 import org.example.exceptions.GenreNotFoundException;
+import org.example.client.GenresClient;
+import org.example.dto.GenreDto;
 import org.example.model.Author;
 import org.example.model.Book;
 import org.example.model.Genre;
 import org.example.repository.AuthorsRepo;
 import org.example.repository.BooksRepo;
-import org.example.repository.GenresRepo;
 import org.example.service.BooksService;
 import org.example.util.LocalizationService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,14 +28,16 @@ import static org.example.util.LocalizationServiceImpl.*;
 public class BookServiceImpl  implements BooksService {
 
     private final BooksRepo booksRepo;
-    private final GenresRepo genresRepo;
+    private final GenresClient genresClient;
     private final AuthorsRepo authorsRepo;
     private final LocalizationService localizationService;
 
     @Transactional(readOnly = true)
     @Override
     public List<Book> getAll() {
-        return booksRepo.findAll();
+        List<Book> books = booksRepo.findAll();
+        books.forEach(this::enrichGenre);
+        return books;
     }
 
     @Transactional(readOnly = true)
@@ -44,7 +47,9 @@ public class BookServiceImpl  implements BooksService {
         if (oBook.isEmpty()) {
             throw new BookNotFoundException(localizationService.getMessage(BOOKS_NOT_FOUND, id));
         }
-        return oBook.get();
+        Book book = oBook.get();
+        enrichGenre(book);
+        return book;
     }
 
     @Transactional
@@ -58,15 +63,19 @@ public class BookServiceImpl  implements BooksService {
         if (oAuthor.isEmpty()) {
             throw new AuthorNotFoundException(localizationService.getMessage(AUTHORS_NOT_FOUND, authorId));
         }
-        if (Objects.isNull(book.getGenre()) || Objects.isNull(book.getGenre().getId())) {
-            throw new IllegalArgumentException("Genre is required");
+        if (Objects.isNull(book.getGenreId())) {
+            if (Objects.nonNull(book.getGenre()) && Objects.nonNull(book.getGenre().getId())) {
+                book.setGenreId(book.getGenre().getId());
+            } else {
+                throw new IllegalArgumentException("Genre is required");
+            }
         }
-        long genreId = book.getGenre().getId();
-        Optional<Genre> oGenre = genresRepo.findById(genreId);
+        long genreId = book.getGenreId();
+        Optional<GenreDto> oGenre = genresClient.getById(genreId);
         if (oGenre.isEmpty()) {
             throw new GenreNotFoundException(localizationService.getMessage(GENRES_NOT_FOUND, genreId));
         }
-        book.setGenre(oGenre.get());
+        book.setGenre(new Genre(oGenre.get().getId(), oGenre.get().getName()));
         book.setAuthor(oAuthor.get());
         return booksRepo.save(book);
     }
@@ -87,13 +96,21 @@ public class BookServiceImpl  implements BooksService {
             }
             book.setAuthor(oAuthor.get());
         }
-        if(Objects.nonNull(book.getGenre())) {
-            Optional<Genre> oGenre = genresRepo.findById(book.getGenre().getId());
+        Long newGenreId = null;
+        if (Objects.nonNull(book.getGenreId())) {
+            newGenreId = book.getGenreId();
+        } else if (Objects.nonNull(book.getGenre()) && Objects.nonNull(book.getGenre().getId())) {
+            newGenreId = book.getGenre().getId();
+        }
+
+        if (Objects.nonNull(newGenreId)) {
+            Optional<GenreDto> oGenre = genresClient.getById(newGenreId);
             if (oGenre.isEmpty()) {
                 throw new GenreNotFoundException(localizationService.
-                        getMessage(GENRES_NOT_FOUND, book.getGenre().getId()));
+                        getMessage(GENRES_NOT_FOUND, newGenreId));
             }
-            book.setGenre(oGenre.get());
+            book.setGenreId(newGenreId);
+            book.setGenre(new Genre(oGenre.get().getId(), oGenre.get().getName()));
         }
         fillBookWithNonNull(bookForUpdate, book);
         return booksRepo.save(bookForUpdate);
@@ -112,9 +129,20 @@ public class BookServiceImpl  implements BooksService {
         if(Objects.nonNull(book.getAuthor())) {
             bookForUpdate.setAuthor(book.getAuthor());
         }
-        if(Objects.nonNull(book.getGenre())) {
-            bookForUpdate.setGenre(book.getGenre());
+        if (Objects.nonNull(book.getGenreId())) {
+            bookForUpdate.setGenreId(book.getGenreId());
         }
+    }
+
+    private void enrichGenre(Book book) {
+        if (book == null || book.getGenreId() == null) {
+            return;
+        }
+        Optional<GenreDto> genre = genresClient.getById(book.getGenreId());
+        if (genre.isEmpty()) {
+            return;
+        }
+        genre.ifPresent(g -> book.setGenre(new Genre(g.getId(), g.getName())));
     }
 
     @Transactional

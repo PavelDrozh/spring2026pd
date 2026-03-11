@@ -1,0 +1,18 @@
+server:
+  port: ${GENRES_SERVICE_PORT:7082}
+
+spring:
+  application:
+    name: genres-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=public
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+  jpa:
+    show-sql: true

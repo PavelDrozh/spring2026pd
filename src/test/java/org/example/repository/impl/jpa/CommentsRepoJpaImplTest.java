@@ -3,7 +3,6 @@ package org.example.repository.impl.jpa;
 import org.example.model.Author;
 import org.example.model.Book;
 import org.example.model.Comment;
-import org.example.model.Genre;
 import org.example.repository.CommentsRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +29,14 @@ class CommentsRepoJpaImplTest {
 
     @Test
     void getAllByBook_returnsOnlyCommentsOfThatBook() {
-        Genre genre1 = em.persist(new Genre(null, "Genre1"));
         Author author1 = em.persist(new Author(null, "Name1", "Surname1", LocalDate.of(2000, 1, 1)));
-        Genre genre2 = em.persist(new Genre(null, "Genre2"));
         Author author2 = em.persist(new Author(null, "Name2", "Surname2", LocalDate.of(2001, 1, 1)));
 
         Book book1 = em.persist(Book.builder()
                 .name("Book1")
                 .description("Desc")
                 .releaseDate(LocalDate.of(2020, 1, 1))
-                .genre(genre1)
+                .genreId(1L)
                 .author(author1)
                 .build());
 
@@ -47,7 +44,7 @@ class CommentsRepoJpaImplTest {
                 .name("Book2")
                 .description("Desc")
                 .releaseDate(LocalDate.of(2021, 1, 1))
-                .genre(genre2)
+                .genreId(2L)
                 .author(author2)
                 .build());
 
@@ -67,14 +64,13 @@ class CommentsRepoJpaImplTest {
 
     @Test
     void getById_returnsCommentWhenExists() {
-        Genre genre = em.persist(new Genre(null, "Genre"));
         Author author = em.persist(new Author(null, "Name", "Surname", LocalDate.of(2000, 1, 1)));
 
         Book book = em.persist(Book.builder()
                 .name("Book")
                 .description("Desc")
                 .releaseDate(LocalDate.of(2020, 1, 1))
-                .genre(genre)
+                .genreId(1L)
                 .author(author)
                 .build());
 
@@ -89,14 +85,13 @@ class CommentsRepoJpaImplTest {
 
     @Test
     void create_persistsWhenIdIsNull() {
-        Genre genre = em.persist(new Genre(null, "Genre"));
         Author author = em.persist(new Author(null, "Name", "Surname", LocalDate.of(2000, 1, 1)));
 
         Book book = em.persist(Book.builder()
                 .name("Book")
                 .description("Desc")
                 .releaseDate(LocalDate.of(2020, 1, 1))
-                .genre(genre)
+                .genreId(1L)
                 .author(author)
                 .build());
 
@@ -111,14 +106,13 @@ class CommentsRepoJpaImplTest {
 
     @Test
     void update_mergesChanges() {
-        Genre genre = em.persist(new Genre(null, "Genre"));
         Author author = em.persist(new Author(null, "Name", "Surname", LocalDate.of(2000, 1, 1)));
 
         Book book = em.persist(Book.builder()
                 .name("Book")
                 .description("Desc")
                 .releaseDate(LocalDate.of(2020, 1, 1))
-                .genre(genre)
+                .genreId(1L)
                 .author(author)
                 .build());
 
@@ -136,14 +130,13 @@ class CommentsRepoJpaImplTest {
 
     @Test
     void delete_removesEntity() {
-        Genre genre = em.persist(new Genre(null, "Genre"));
         Author author = em.persist(new Author(null, "Name", "Surname", LocalDate.of(2000, 1, 1)));
 
         Book book = em.persist(Book.builder()
                 .name("Book")
                 .description("Desc")
                 .releaseDate(LocalDate.of(2020, 1, 1))
-                .genre(genre)
+                .genreId(1L)
                 .author(author)
                 .build());
 
@@ -159,16 +152,14 @@ class CommentsRepoJpaImplTest {
 
     @Test
     void deleteAllByBook_deletesAndReturnsCount() {
-        Genre genre1 = em.persist(new Genre(null, "Genre1"));
         Author author1 = em.persist(new Author(null, "Name1", "Surname1", LocalDate.of(2000, 1, 1)));
-        Genre genre2 = em.persist(new Genre(null, "Genre2"));
         Author author2 = em.persist(new Author(null, "Name2", "Surname2", LocalDate.of(2001, 1, 1)));
 
         Book book1 = em.persist(Book.builder()
                 .name("Book1")
                 .description("Desc")
                 .releaseDate(LocalDate.of(2020, 1, 1))
-                .genre(genre1)
+                .genreId(1L)
                 .author(author1)
                 .build());
 
@@ -176,7 +167,7 @@ class CommentsRepoJpaImplTest {
                 .name("Book2")
                 .description("Desc")
                 .releaseDate(LocalDate.of(2021, 1, 1))
-                .genre(genre2)
+                .genreId(2L)
                 .author(author2)
                 .build());
 

@@ -16,8 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 @Entity // Указывает, что данный класс является сущностью
 @Table(name = "BOOKS") // Задает имя таблицы, на которую будет отображаться сущность
-@NamedEntityGraph(name = "books-genre-author-entity-graph",
-        attributeNodes = {@NamedAttributeNode("genre"), @NamedAttributeNode("author")})
+@NamedEntityGraph(name = "books-author-entity-graph",
+        attributeNodes = {@NamedAttributeNode("author")})
 public class Book {
 
     public Book (long id, String name, String description, LocalDate releaseDate, Genre genre, Author author) {
@@ -26,6 +26,7 @@ public class Book {
         this.description = description;
         this.releaseDate = releaseDate;
         this.genre = genre;
+        this.genreId = genre == null ? null : genre.getId();
         this.author = author;
     }
 
@@ -43,8 +44,9 @@ public class Book {
     @NotNull
     @EqualsAndHashCode.Exclude
     private LocalDate releaseDate;
-    @OneToOne(targetEntity = Genre.class)
-    @JoinColumn(name = "GENRE_ID")
+    @Column(name = "GENRE_ID", nullable = false)
+    private Long genreId;
+    @Transient
     private Genre genre;
     @OneToOne(targetEntity = Author.class)
     @JoinColumn(name = "AUTHOR_ID")
