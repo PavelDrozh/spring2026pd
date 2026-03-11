@@ -71,9 +71,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/info").permitAll()
-                        .requestMatchers("/browser/**").permitAll() //.hasAnyRole("ADMIN")
                         .requestMatchers("/actuator/**").permitAll() //.hasAnyRole("ADMIN") в рамках задания доступно всем, в идеале - только админ
-                        .requestMatchers("/datarest").permitAll() //.hasAnyRole("ADMIN") аналогичо
+                        .requestMatchers("/datarest/**").permitAll() //.hasAnyRole("ADMIN") аналогичо
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->
