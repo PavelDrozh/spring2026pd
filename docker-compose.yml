@@ -1,0 +1,45 @@
+services:
+  spring2026pd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SERVICE_PORT: 7081
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres?currentSchema=public
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      GENRES_SERVICE_BASE_URL: http://genres-service:7082
+    ports:
+      - "7081:7081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      genres-service:
+        condition: service_started
+  genres-service:
+    build:
+      context: ./genres-service
+      dockerfile: Dockerfile
+    environment:
+      GENRES_SERVICE_PORT: 7082
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres?currentSchema=public
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    ports:
+      - "7082:7082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+  postgres:
+    image: "postgres:17"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
