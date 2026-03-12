@@ -27,6 +27,13 @@ spring:
       basePath: /datarest
   jmx:
     enabled: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
 jwt:
   private.key: classpath:app.key
   public.key: classpath:app.pub
@@ -47,3 +54,7 @@ management:
 
 genres-service:
   base-url: ${GENRES_SERVICE_BASE_URL:http://localhost:7082}
+
+app:
+  kafka:
+    genre-create-topic: ${KAFKA_GENRE_CREATE_TOPIC:genre.create}
