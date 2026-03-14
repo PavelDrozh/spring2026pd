@@ -1,5 +1,6 @@
 package org.example.client;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.example.dto.GenreDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -17,6 +18,7 @@ import java.util.Optional;
 @Component
 public class GenresClient {
 
+    private static final String GENRES_SERVICE_CB = "genresService";
     private final RestTemplate restTemplate;
     private final String baseUrl;
 
@@ -26,6 +28,7 @@ public class GenresClient {
     }
 
     @Cacheable(cacheNames = "genresById", key = "#id")
+    @CircuitBreaker(name = GENRES_SERVICE_CB, fallbackMethod = "getByIdFallback")
     public Optional<GenreDto> getById(long id) {
         try {
             ResponseEntity<GenreDto> resp = restTemplate.getForEntity(baseUrl + "/api/genres/" + id, GenreDto.class);
@@ -35,7 +38,19 @@ public class GenresClient {
         }
     }
 
+    private Optional<GenreDto> getByIdFallback(long id, Throwable ex) {
+        return Optional.of(getUnknown(id));
+    }
+
+    private static GenreDto getUnknown(long id) {
+        return GenreDto.builder()
+                .id(id)
+                .name("Unknown")
+                .build();
+    }
+
     @Cacheable(cacheNames = "genresAll")
+    @CircuitBreaker(name = GENRES_SERVICE_CB, fallbackMethod = "getAllFallback")
     public List<GenreDto> getAll() {
         ResponseEntity<List<GenreDto>> resp = restTemplate.exchange(
                 baseUrl + "/api/genres",
@@ -46,4 +61,9 @@ public class GenresClient {
         );
         return resp.getBody() == null ? Collections.emptyList() : resp.getBody();
     }
+
+    private List<GenreDto> getAllFallback(Throwable ex) {
+        return List.of(getUnknown(0));
+    }
+
 }
